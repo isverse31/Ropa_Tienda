@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Prendas de Ropa</title>
+    <style>
+        .prenda {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+            text-align: center;
+        }
+        .prenda img {
+            max-width: 100px;
+            height: auto;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgb(0,0,0);
+            background-color: rgba(0,0,0,0.4);
+            padding-top: 60px;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 5% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+            #cerrar-sesion {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Lista de Prendas</h1>
+    <div id="lista-prendas"></div>
+
+    <h2>Agregar Prenda</h2>
+    <form id="agregar-formulario">
+        <input type="text" name="nombre" placeholder="Nombre" required>
+        <input type="number" name="precio" placeholder="Precio" required>
+        <input type="url" name="imagen_url" placeholder="URL de la imagen" required>
+        <button type="submit">Agregar</button>
+    </form>
+    <div id="mensaje"></div>
+
+    <div id="modal-edicion" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <form id="actualizar-formulario">
+                <input type="hidden" id="id" name="id">
+                <input type="text" id="nombre2" name="nombre" placeholder="Nombre" required>
+                <input type="number" id="precio2" name="precio" placeholder="Precio" required>
+                <button type="submit">Actualizar</button>
+            </form>
+            <div id="mensaje-actualizacion"></div>
+        </div>
+    </div>
+
+    <script>
+        // Función para obtener y mostrar la lista de prendas
+        async function obtenerPrendas() {
+            try {
+                // Realizar una solicitud GET a la API para obtener la lista de prendas
+                const response = await fetch('ropa-api.php');
+                
+                // Verificar si la solicitud fue exitosa
+                if (response.ok) {
+                    const prendas = await response.json();
+                    // Construir el HTML para mostrar la lista de prendas
+                    const listaHTML = prendas.map(prenda => `
+                        <div class="prenda">
+                            <p><strong>Nombre:</strong> ${prenda.nombre}</p>
+                            <p><strong>Precio:</strong> ${prenda.precio}</p>
+                            <img src="${prenda.imagen_url}" alt="${prenda.nombre}">
+                            <button onclick="editarPrenda(${prenda.id}, '${prenda.nombre}', ${prenda.precio}, '${prenda.imagen_url}')">Editar</button>
+                            <button onclick="eliminarPrenda(${prenda.id})">Eliminar</button>
+                        </div>
+                    `).join('');
+                    
+                    // Mostrar la lista de prendas en el contenedor
+                    document.getElementById('lista-prendas').innerHTML = listaHTML;
+                } else {
+                    // Si la solicitud no fue exitosa, mostrar mensaje de error
+                    document.getElementById('lista-prendas').textContent = 'Error al obtener la lista de prendas';
+                }
+            } catch (error) {
+                console.error('Error al realizar la solicitud:', error);
+                // Mostrar mensaje de error en caso de excepción
+                document.getElementById('lista-prendas').textContent = 'Error al realizar la solicitud';
+            }
+        }
+
+        // Llamar a la función para obtener y mostrar la lista de prendas al cargar la página
+        window.onload = obtenerPrendas;
+
+        // Obtener referencia al formulario
+        const formulario = document.getElementById('agregar-formulario');
+
+        // Agregar evento de envío del formulario
+        formulario.addEventListener('submit', async (e) => {
+            e.preventDefault(); // Evitar el comportamiento por defecto del formulario
+            
+            // Crear un objeto FormData para enviar datos del formulario
+            const formData = new FormData(formulario);
+            
+            try {
+                // Realizar una solicitud POST a la API para agregar la prenda
+                const response = await fetch('agregar-ropa.php', {
+                    method: 'POST',
+                    body: formData // Enviar datos del formulario
+                });
+
+                // Verificar si la solicitud fue exitosa
+                if (response.ok) {
+                    const data = await response.json();
+                    // Mostrar mensaje de éxito
+                    document.getElementById('mensaje').textContent = data.mensaje;
+                    // Limpiar el formulario después de agregar la prenda
+                    formulario.reset();
+                    // Volver a cargar la lista de prendas
+                    obtenerPrendas();
+                } else {
+                    // Si la solicitud no fue exitosa, mostrar mensaje de error
+                    document.getElementById('mensaje').textContent = 'Error al agregar la prenda';
+                }
+            } catch (error) {
+                console.error('Error al realizar la solicitud:', error);
+                // Mostrar mensaje de error en caso de excepción
+                document.getElementById('mensaje').textContent = 'Error al realizar la solicitud';
+            }
+        });
+
+        // Función para eliminar una prenda
+        function eliminarPrenda(id) {
+            if (confirm('¿Estás seguro de que deseas eliminar esta prenda?')) {
+                fetch('eliminar-ropa.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ id: id })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data); // Manejar la respuesta de la eliminación
+                    obtenerPrendas(); // Actualizar la lista de prendas después de eliminar
+                })
+                .catch(error => console.error('Error al eliminar la prenda:', error));
+            }
+        }
+
+        // Función para cargar datos de la prenda en el formulario de edición
+        function cargarDatosPrendaEnFormulario(id, nombre, precio, imagen) {
+            document.getElementById('id').value = id;
+            document.getElementById('nombre2').value = nombre;
+            document.getElementById('precio2').value = precio;
+            // Aquí puedes manejar la carga de la imagen si es necesario
+        }
+
+        // Función para abrir el modal de edición y cargar los datos de la prenda
+        function editarPrenda(id, nombre, precio, imagen) {
+            cargarDatosPrendaEnFormulario(id, nombre, precio, imagen);
+            const modal = document.getElementById('modal-edicion');
+            modal.style.display = 'block';
+
+            // Evento para cerrar el modal al hacer clic en la "X"
+            const span = document.getElementsByClassName('close')[0];
+            span.onclick = function() {
+                modal.style.display = 'none';
+            }
+
+            // Evento para cerrar el modal al hacer clic fuera de él
+            window.onclick = function(event) {
+                if (event.target == modal) {
+                    modal.style.display = 'none';
+                }
+            }
+        }
+
+        // Obtener referencia al formulario de actualización
+        const formularioActualizar = document.getElementById('actualizar-formulario');
+
+        formularioActualizar.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formDataActualizar = new FormData(formularioActualizar);
+
+            try {
+                const response = await fetch('editar-ropa.php', {
+                    method: 'POST',
+                    body: formDataActualizar
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('mensaje-actualizacion').textContent = data.mensaje;
+                    formularioActualizar.reset();
+                    obtenerPrendas();
+                    document.getElementById('modal-edicion').style.display = 'none';
+                } else {
+                    document.getElementById('mensaje-actualizacion').textContent = 'Error al actualizar la prenda';
+                }
+            } catch (error) {
+                console.error('Error al realizar la solicitud:', error);
+                document.getElementById('mensaje-actualizacion').textContent = 'Error al realizar la solicitud de actualización';
+            }
+        });
+    </script>
+</body>
+</html>

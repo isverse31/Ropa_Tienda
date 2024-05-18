@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="es">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Tienda de Ropa</title>
+        <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f3f3f3;
+        }
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            color: #333;
+        }
+        form {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #555;
+        }
+        input[type="text"],
+        input[type="number"],
+        input[type="file"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        #ropa-lista {
+            max-width: 800px;
+            margin: 20px auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-gap: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px auto;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        th, td {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #007bff;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover {
+            background-color: #ddd;
+        }
+
+        td img {
+            max-width: 100px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .center {
+            text-align: center;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+        .prenda {
+            background-color: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .prenda img {
+            width: 100%;
+            height: auto;
+            border-bottom: 1px solid #eee;
+        }
+        .prenda-info {
+            padding: 10px;
+        }
+        .prenda-nombre {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        .prenda-precio {
+            color: #007bff;
+            font-size: 16px;
+        }
+
+        #lista-prendas {
+            width: 100%;
+            max-width: 800px;
+            border-collapse: collapse;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #lista-prendas th, #lista-prendas td {
+            padding: 15px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        #lista-prendas th {
+            background-color: #007bff;
+            color: #fff;
+            text-transform: uppercase;
+        }
+
+        #lista-prendas tbody tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        #lista-prendas tbody tr:hover {
+            background-color: #ddd;
+        }
+
+        #lista-prendas td img {
+            max-width: 100px;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* Estilos para el contenedor modal */
+.modal {
+    display: none; /* Por defecto, el modal estará oculto */
+    position: fixed;
+    z-index: 1000; /* Z-index alto para asegurar que esté por encima del resto del contenido */
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Fondo semitransparente */
+}
+
+/* Estilos para el contenido del modal */
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Estilos para el botón de cerrar el modal */
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+
+        #cerrar-sesion button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        #cerrar-sesion button:hover {
+            background-color: #0056b3;
+        }
+        @media (max-width: 600px) {
+            #cerrar-sesion {
+                padding: 10px;
+            }
+        }
+
+    </style>
+    </head>
+    <div id="cerrar-sesion">
+        <h1>Cerrar Sesión</h1>
+        <button onclick="cerrarSesion()">Cerrar Sesión</button>
+    </div>
+
+    <script>
+        function cerrarSesion() {
+            // Aquí puedes agregar el código para cerrar sesión
+            alert("Sesión cerrada exitosamente");
+            // Redirige a la página de inicio de sesión u otra página deseada
+            window.location.href = "login.html";
+        }
+    </script>
+    <body>
+        <h1>¡Bienvenido a la Tienda de Ropa!</h1>
+
+        <!-- Formulario para agregar nueva ropa -->
+        <form id="agregar-formulario">
+            <label for="nombre">Nombre:</label>
+            <input type="text" id="nombre" name="nombre" required><br><br>
+            <label for="precio">Precio:</label>
+            <input type="number" id="precio" name="precio" step="0.01"
+                required><br><br>
+            <label for="imagen_url">URL de la Imagen:</label>
+            <input type="url" id="imagen_url" name="imagen_url"
+                required><br><br>
+            <button type="submit">Agregar Prenda</button>
+        </form>
+
+        <div id="mensaje"></div>
+
+        <div id="modal-edicion" class="modal">
+            <div class="modal-content">
+                <form id="actualizar-formulario" style="display: block;">
+                    <input type="hidden" id="id" name="id">
+                    <label for="nombre">Nombre:</label>
+                    <input type="text" id="nombre2" name="nombre"
+                        required><br><br>
+                    <label for="precio">Precio:</label>
+                    <input type="number" id="precio2" name="precio" step="0.01"
+                        required><br><br>
+                    <label for="imagen">Imagen:</label>
+                    <input type="url" id="imagen_url2" name="imagen_url"
+                        required><br><br>
+                    <button type="submit">Actualizar Prenda</button>
+                </form>
+
+                <span class="close">&times;</span>
+            </div>
+        </div>
+
+        <p id="mensaje-actualizacion"></p>
+
+        <!-- Contenedor para mostrar la lista de prendas -->
+<center>
+    <table id="lista-prendas">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Imagen</th>
+            </tr>
+        </thead>
+        <tbody>
+</center>
+        
+
+
+        <script src="script3.js"></script>
+    </body>
+</html>
